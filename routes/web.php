@@ -4,6 +4,7 @@ use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\TeamController;
 use App\Http\Controllers\UserController;
+use App\Mail\LeaveRequestCreated;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -43,5 +44,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/calendar', [CalendarController::class, 'showCalendarPage'])->name('calendar');
 });
 
+Route::get('/test', function () {
+
+    $leaveRequest = \App\Models\LeaveRequest::find(13146);
+    $leaveUser = $leaveRequest->user;
+
+    // dump($leaveRequest->leaveStatusLog);
+    dump($leaveRequest->latestLeaveStatusLog->toArray());
+
+    // \Illuminate\Support\Facades\Mail::to($leaveUser->employee->supervisor()->user)->send(new LeaveRequestCreated($leaveRequest));
+});
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

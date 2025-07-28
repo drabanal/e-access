@@ -2,23 +2,31 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\LeaveRequestCreated;
+use App\Mail\LeaveRequestCreatedInBehalf;
+use App\Mail\LeaveRequestCreatedInBehalfConfirmation;
+use App\Mail\LeaveRequestStatusUpdated;
 use App\Models\LeaveRequest;
 use App\Models\LeaveStatus;
 use App\Models\LeaveType;
 use App\Models\User;
+use App\Repositories\LeaveRequestRepository;
 use App\Services\LeaveService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 
 class LeaveController extends Controller
 {
     protected $leaveService;
+    protected $leaveRepository;
 
     public function __construct()
     {
         $this->leaveService = new LeaveService();
+        $this->leaveRepository = new LeaveRequestRepository();
     }
 
     public function showLeavesPage($status)
@@ -87,14 +95,17 @@ class LeaveController extends Controller
     {
         try {
             $data = $request->all();
-            $authUser = Auth::user();
+            $auth_user = Auth::user();
 
-            if ($data['user_id'] != $authUser->id) {
+            if ($data['user_id'] != $auth_user->id) {
                 $leave_user = $this->leaveService->getUserById($data['user_id']);
                 $data['leave_status_id'] = ($leave_user->userlevel == User::ADMIN_ROLE) ? LeaveStatus::TL_APPROVED : LeaveStatus::PENDING;
                 $data['remarks'] = '[TL OVERRIDE]: '.$data['remarks'];
+                $created_in_behalf = true;
             } else {
-                $data['leave_status_id'] = ($authUser->userlevel == User::ADMIN_ROLE) ? LeaveStatus::TL_APPROVED : LeaveStatus::PENDING;
+                $data['leave_status_id'] = ($auth_user->userlevel == User::ADMIN_ROLE) ? LeaveStatus::TL_APPROVED : LeaveStatus::PENDING;
+                $leave_user = Auth::user();
+                $created_in_behalf = false;
             }
 
             $validate = $this->leaveService->validateLeave(null, $data);
@@ -135,8 +146,15 @@ class LeaveController extends Controller
                     $this->leaveService->addStatusLog([
                         'leave_request_id' => $leave->id,
                         'leave_status_id' => $data['leave_status_id'],
-                        'reason' => ($authUser->id != $leave->user_id) ? 'Leave added by '.$authUser->employee->getFullNameAttribute() : null
+                        'reason' => ($auth_user->id != $leave->user_id) ? 'Leave added by '.$auth_user->employee->getFullNameAttribute() : null
                     ]);
+
+                    if (!$created_in_behalf) {
+                        Mail::to($leave_user->employee->supervisor()->user)->send(new LeaveRequestCreated($leave));
+                    } else {
+                        Mail::to($leave_user)->send(new LeaveRequestCreatedInBehalf($leave, $auth_user));
+                        Mail::to($leave_user->employee->supervisor()->user)->send(new LeaveRequestCreatedInBehalfConfirmation($leave));
+                    }
                 }
             }
 
@@ -247,7 +265,7 @@ class LeaveController extends Controller
                 }
 
                 $user = Auth::user();
-                $send_notification = ($user->id !== $leave_request->user_id) ? true : false;
+                // $send_notification = ($user->id !== $leave_request->user_id) ? true : false;
                 $status_id = ($user->userlevel == User::ADMIN_ROLE) ? LeaveStatus::TL_APPROVED : LeaveStatus::PENDING;
 
                 if ($request->input('action') == 'approve') {
@@ -281,6 +299,10 @@ class LeaveController extends Controller
                     'leave_status_id' => $status_id,
                     'reason' => $request->input('reason')
                 ]);
+
+                $leave_request = $this->leaveRepository->find($leave_id);
+
+                Mail::to($leave_request->user)->send(new LeaveRequestStatusUpdated($leave_request));
             }
 
             $message = '';

@@ -123,7 +123,7 @@ class LeaveRequestRepository extends AbstractRepository
         $currentYear = Carbon::now()->format('Y');
         $yearRange = implode(',', [$currentYear - 1, $currentYear, $currentYear + 1]);
 
-        $query = $this->model->select('leave_requests.id', 'leave_requests.leave_type_id', 'leave_requests.remarks')
+        $query = $this->model->select('leave_requests.id', 'leave_requests.leave_type_id', 'leave_requests.remarks', 'employees.teamname')
             ->addSelect(DB::raw('DATE_FORMAT(leave_requests.date_time_from, "%Y-%m-%d") AS start'))
             ->addSelect(DB::raw('DATE_FORMAT(leave_requests.date_time_to, "%Y-%m-%d") AS end'))
             ->addSelect('leave_types.name AS leave_type_name')

@@ -31,11 +31,20 @@ class Employee extends Model
 
     public function getFullNameAttribute()
     {
-        return $this->empfname . ', ' . $this->empgname;
+        return $this->empgname . ' ' . $this->empfname;
     }
 
     public function leaveCredits()
     {
         return $this->hasOne(LeaveCredit::class, 'empid');
+    }
+
+    public function supervisor()
+    {
+        if ($this->posid_man) {
+            return Employee::where('empid', $this->posid_man)->first();
+        }
+
+        return null;
     }
 }

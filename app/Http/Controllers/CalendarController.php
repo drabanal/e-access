@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\LeaveType;
 use App\Services\LeaveService;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class CalendarController extends Controller
@@ -39,10 +40,11 @@ class CalendarController extends Controller
             return (object) [
                 'title' => $item->title,
                 'start' => $item->start,
-                'color' => $leaveTypeColors[$item->leave_type_id - 1]
+                'color' => $leaveTypeColors[$item->leave_type_id - 1],
+                'team' => $item->teamname
             ];
         });
 
-        return Inertia::render('Calendar', ['leaveTypes' => $leaveTypes, 'items' => $items]);
+        return Inertia::render('Calendar', ['leaveTypes' => $leaveTypes, 'items' => $items, 'user' => Auth::user()->employee]);
     }
 }

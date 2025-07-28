@@ -30,4 +30,24 @@ class LeaveRequest extends Model
     {
         return $this->belongsTo(LeaveType::class);
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function leaveStatus()
+    {
+        return $this->belongsTo(LeaveStatus::class);
+    }
+
+    public function leaveStatusLogs()
+    {
+        return $this->hasMany(LeaveStatusLog::class);
+    }
+
+    public function latestLeaveStatusLog()
+    {
+        return $this->hasOne(LeaveStatusLog::class)->latestOfMany();
+    }
 }

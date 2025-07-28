@@ -9,7 +9,7 @@ import UserMenuContent from './UserMenuContent.vue';
 
 const page = usePage();
 const user = page.props.auth.user as User;
-console.log(user)
+
 const { isMobile, state } = useSidebar();
 </script>
 
