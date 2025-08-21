@@ -18,7 +18,7 @@ defineProps({ leaveTypes: Array, employee: Object })
 
 const breadcrumbs = ref([
     { label: 'Leaves' },
-    { label: 'Cancelled Request' }
+    { label: 'Cancelled' }
 ])
 
 const fetchingRequests = ref(true);

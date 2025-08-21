@@ -2,8 +2,10 @@
 
 namespace App\Services;
 
+use App\Models\LeaveCreditsDetail;
 use App\Models\LeaveType;
 use App\Repositories\LeaveCreditRepository;
+use App\Repositories\LeaveCreditsDetailRepository;
 use App\Repositories\LeaveRequestRepository;
 use App\Repositories\LeaveStatusLogRepository;
 use App\Repositories\LeaveTypeRepository;
@@ -18,6 +20,7 @@ class LeaveService
     protected $leaveTypeRepository;
     protected $leaveStatusLogRepository;
     protected $userRepository;
+    protected $leaveCreditsDetailRepository;
 
     public function __construct()
     {
@@ -26,6 +29,7 @@ class LeaveService
         $this->leaveTypeRepository = new LeaveTypeRepository();
         $this->leaveStatusLogRepository = new LeaveStatusLogRepository();
         $this->userRepository = new UserRepository();
+        $this->leaveCreditsDetailRepository = new LeaveCreditsDetailRepository();
     }
 
     public function getLeaveCredits($user)
@@ -205,5 +209,62 @@ class LeaveService
     public function getAllApprovedRequests()
     {
         return $this->leaveRequestRepository->getAllApprovedRequests();
+    }
+
+    public function createUpdateReferenceData($leaveRequest)
+    {
+        $leave_user = $leaveRequest->user;
+
+        $data = [
+            'empid' => $leave_user->userid,
+            'actualdateadded' => Carbon::now(),
+            'ldate' => $leaveRequest->date_time_from,
+            'remarks' => $leaveRequest->remarks,
+            'status' => $leaveRequest->leave_status_id - 1,
+            'tagvl' => $leaveRequest->leave_type_id - 1,
+            'fromtime' => $leaveRequest->date_time_from,
+            'totime' => $leaveRequest->date_time_to
+        ];
+
+        switch ($leaveRequest->leave_type_id) {
+            case LeaveType::SICK_LEAVE:
+                $data['slday'] = 0;
+                $data['slhours'] = $leaveRequest->duration;
+                break;
+            case LeaveType::VACATION_LEAVE:
+                $data['vlday'] = 0;
+                $data['vlhours'] = $leaveRequest->duration;
+                break;
+            case LeaveType::LWOP:
+                $data['lwopday'] = 0;
+                $data['lwophours'] = $leaveRequest->duration;
+                break;
+            case LeaveType::MATERNITY_LEAVE:
+                $data['mlday'] = 0;
+                $data['mlhours'] = $leaveRequest->duration;
+                break;
+            case LeaveType::PATERNITY_LEAVE:
+                $data['plday'] = 0;
+                $data['plhours'] = $leaveRequest->duration;
+                break;
+            case LeaveType::BEREAVEMENT_LEAVE:
+                $data['blday'] = 0;
+                $data['blhours'] = $leaveRequest->duration;
+                break;
+            case LeaveType::UNDERTIME:
+                $data['utday'] = 0;
+                $data['uthours'] = $leaveRequest->duration;
+                break;
+            default:
+                break;
+        }
+
+        if ($leaveRequest->reference_id) {
+            $this->leaveCreditsDetailRepository->update($leaveRequest->reference_id, $data);
+        } else {
+            $leaveCreditsDetail = $this->leaveCreditsDetailRepository->create($data);
+            $leaveRequest->reference_id = $leaveCreditsDetail->id;
+            $leaveRequest->save();
+        }
     }
 }

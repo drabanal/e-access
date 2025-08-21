@@ -26,27 +26,27 @@ const menuItems = ref([
         label: 'Leaves',
         items: [
             {
-                label: 'New Request',
+                label: 'New',
                 icon: 'pi pi-plus',
                 url: '/leaves/add'
             },
             {
-                label: 'Approved Request',
+                label: 'Approved',
                 icon: 'pi pi-calendar-plus',
                 url: '/leaves/approved'
             },
             {
-                label: 'Pending Request',
+                label: 'Pending',
                 icon: 'pi pi-calendar-clock',
                 url: '/leaves/pending'
             },
             {
-                label: 'Disapproved Request',
+                label: 'Disapproved',
                 icon: 'pi pi-calendar-times',
                 url: '/leaves/disapproved'
             },
             {
-                label: 'Cancelled Request',
+                label: 'Cancelled',
                 icon: 'pi pi-calendar-minus',
                 url: '/leaves/cancelled'
             },

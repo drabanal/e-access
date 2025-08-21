@@ -8,19 +8,11 @@ import Card from 'primevue/card';
 import { useToast } from "primevue/usetoast";
 import { router } from '@inertiajs/vue3';
 
-const props = defineProps({ leaveTypes: Array, user: Object, inBehalf: Boolean })
-
-// const breadcrumbs: BreadcrumbItem[] = [
-//     {
-//         title: props.inBehalf ? 'Request Leave - ' + props.user.employee.empfname + ', ' + props.user.employee.empgname : 'Request Leave',
-//         href: '/leaves/add',
-//     }
-// ];
-
+const props = defineProps({ leaveTypes: Array, leaveUser: Object, user: Object, inBehalf: Boolean })
 
 const breadcrumbs = ref([
     { label: 'Leaves' },
-    { label: props.inBehalf ? 'New Request - ' + props.user.employee.empfname + ', ' + props.user.employee.empgname : 'New Request' }
+    { label: props.inBehalf ? 'New - ' + props.leaveUser?.employee.empfname + ', ' + props.leaveUser?.employee.empgname : 'New' }
 ])
 
 const toast = useToast();
@@ -140,7 +132,7 @@ const submitRequest = () => {
 
     isSubmitting.value = true
     const payload = {
-        user_id: props.user?.id,
+        user_id: props.leaveUser?.id,
         leave_type_id: leaveType.value.id,
         date_range: [
             dateRange.value[0].toLocaleDateString() + ' ' + timeRange.value[0].toLocaleTimeString(),
@@ -287,8 +279,8 @@ const disabledSeconds = () => {
                         </div>
                     </div>
                     <div class="flex flex-wrap justify-end gap-3">
-                        <Button label="Clear" severity="secondary" />
-                        <Button label="Submit" :disabled="!canSubmit" @click="submitRequest" />
+                        <Button label="Clear" icon="pi pi-undo" severity="secondary" :disabled="isSubmitting" />
+                        <Button label="Submit" :icon="!isSubmitting ? 'pi pi-send' : 'pi pi-spin pi-spinner'" :disabled="!canSubmit || isSubmitting" @click="submitRequest" />
                     </div>
                 </template>
             </Card>

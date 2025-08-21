@@ -9,17 +9,8 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
-    return Inertia::render('Welcome');
+    return Inertia::render('auth/Login');
 })->name('home');
-
-// Route::get('dashboard', function () {
-//     return Inertia::render('Dashboard');
-// })->middleware(['auth', 'verified'])->name('dashboard');
-
-// Route::prefix('profile')->group(function () {
-//     Route::get('/', [UserController::class, 'getProfile'])->name('profile');
-//     Route::get('/show', [UserController::class, 'getProfileInfo'])->name('profile.show');
-// })->middleware(['auth', 'verified']);
 
 
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -44,15 +35,5 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/calendar', [CalendarController::class, 'showCalendarPage'])->name('calendar');
 });
 
-Route::get('/test', function () {
-
-    $leaveRequest = \App\Models\LeaveRequest::find(13146);
-    $leaveUser = $leaveRequest->user;
-
-    // dump($leaveRequest->leaveStatusLog);
-    dump($leaveRequest->latestLeaveStatusLog->toArray());
-
-    // \Illuminate\Support\Facades\Mail::to($leaveUser->employee->supervisor()->user)->send(new LeaveRequestCreated($leaveRequest));
-});
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head } from '@inertiajs/vue3';
-import { onMounted, ref, reactive, watch } from 'vue';
+import { onMounted, ref, reactive, watch, computed, onBeforeMount } from 'vue';
 import FullCalendar from '@fullcalendar/vue3';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -18,20 +18,33 @@ const props = defineProps({ leaveTypes: Array, items: Array });
 const fullCalendar = ref(null);
 const calendarItems = ref();
 
+const filteredEvents = computed(() => {
+    return calendarItems.value.filter(event => {
+        if (team.value.id === 2) {
+            if (event.team == user.employee.teamname) {
+                return true;
+            }
+            return false;                
+        } else {
+            return true;
+        }
+    });
+});
+
 const calendarOptions = reactive({
-  plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
-  initialView: 'dayGridMonth',
-  headerToolbar: {
-    left: 'prev,next today',
-    center: 'title',
-    right: 'dayGridMonth,timeGridWeek,timeGridDay'
-  },
-  editable: false,
-  selectable: true,
-  selectMirror: true,
-  dayMaxEvents: true,
-  weekends: true,
-  events: props.items
+    plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
+    initialView: 'dayGridMonth',
+    headerToolbar: {
+        left: 'prev,next today',
+        center: 'title',
+        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+    },
+    editable: false,
+    selectable: true,
+    selectMirror: true,
+    dayMaxEvents: true,
+    weekends: true,
+    events: filteredEvents
 })
 
 const teams = ref([
@@ -43,15 +56,7 @@ const team = ref({ name: 'All Team', id: 1 });
 const page = usePage();
 const user = page.props.auth.user as User;
 
-watch(() => team.value, (val) => {
-    if (val.id === 2) {
-        calendarItems.value = props.items?.filter(item => item.team == user.employee.teamname)
-    } else {
-        calendarItems.value = props.items
-    }
-}, { deep: true, immediate: true});
-
-onMounted(() => {
+onBeforeMount(() => {
     calendarItems.value = props.items
 })
 </script>

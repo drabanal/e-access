@@ -22,7 +22,7 @@ const props = defineProps({ leaveTypes: Array, employee: Object })
 
 const breadcrumbs = ref([
     { label: 'Leaves' },
-    { label: 'Pending Request' }
+    { label: 'Pending' }
 ])
 
 const confirm = useConfirm();

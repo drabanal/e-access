@@ -18,7 +18,7 @@ defineProps({ leaveTypes: Array, employee: Object })
 
 const breadcrumbs = ref([
     { label: 'Leaves' },
-    { label: 'Approved Request' }
+    { label: 'Approved' }
 ])
 
 const toast = useToast();

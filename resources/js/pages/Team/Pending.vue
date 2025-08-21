@@ -19,7 +19,7 @@ const props = defineProps({ leaveTypes: Array })
 
 const breadcrumbs = ref([
     { label: 'Team' },
-    { label: 'Pending Requests' }
+    { label: 'Pending Leaves' }
 ])
 
 const confirm = useConfirm();
@@ -53,7 +53,7 @@ const actionReason = ref('');
 const isSubmitting = ref(false);
 const selectedRequest = ref();
 const selectedStatus = ref('');
-
+const selectedRequests = ref([]);
 const canSubmit = computed(() => {
     return actionReason.value && actionReason.value.trim() !== '' ? true : false
 });
@@ -71,6 +71,7 @@ const confirmAction = () => {
         reason: actionReason.value,
         action: selectedStatus.value
     }
+    isSubmitting.value = true
 
     axios.post(`/leaves/update-status`, payload).then((response) => {
         isSubmitting.value = false
@@ -79,7 +80,6 @@ const confirmAction = () => {
         showActionDialog.value = false
     })
     .catch((error) => {
-        console.log(error)
         isSubmitting.value = false
         toast.add({ severity: 'error', summary: 'Something went wrong!', detail: error.response.data.message, life: 5000 });
     });
@@ -114,7 +114,10 @@ onMounted(() => {
                     :rowsPerPageOptions="perPageOptions" 
                     stripedRows 
                     showGridlines
+                    v-model:selection="selectedRequests"
+                    dataKey="id"
                     tableStyle="min-width: 50rem">
+                    <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
                     <Column field="date_added" header="Date Added" style="width: 10%"></Column>
                     <Column field="full_name" header="Name" style="width: 20%"></Column>
                     <Column field="leave_type_name" header="Type" style="width: 10%"></Column>
@@ -147,8 +150,8 @@ onMounted(() => {
                 </FloatLabel>
             </div>
             <div class="flex flex-wrap justify-end gap-3">
-                <Button type="button" label="Cancel" severity="secondary" @click="showActionDialog = false"></Button>
-                <Button type="button" label="Yes" @click="confirmAction" :disabled="!canSubmit" :severity="selectedStatus == 'approve' ? 'primary' : 'danger'"></Button>
+                <Button type="button" label="Cancel" severity="secondary" :disabled="isSubmitting" @click="showActionDialog = false"></Button>
+                <Button type="button" label="Yes" @click="confirmAction" :disabled="!canSubmit || isSubmitting" :severity="selectedStatus == 'approve' ? 'primary' : 'danger'"></Button>
             </div>
         </Dialog>
 

@@ -300,8 +300,8 @@ const disabledSeconds = () => {
                         </div>
                     </div>
                     <div class="flex flex-wrap justify-end gap-3">
-                        <Button label="Clear" severity="secondary" />
-                        <Button label="Submit" :disabled="!canSubmit" @click="submitRequest" />
+                        <Button label="Clear" icon="pi pi-undo" severity="secondary" :disabled="isSubmitting" />
+                        <Button label="Submit" :icon="!isSubmitting ? 'pi pi-send' : 'pi pi-spin pi-spinner'" :disabled="!canSubmit || isSubmitting" @click="submitRequest" />
                     </div>
                 </template>
             </Card>
