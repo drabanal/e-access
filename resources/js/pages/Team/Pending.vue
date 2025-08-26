@@ -102,9 +102,20 @@ onMounted(() => {
         <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
             <div class="relative overflow-hidden rounded-xl ">
                 <div class="card flex justify-between px-1">
-                    <Calendar v-model="dateFilter" selectionMode="range" showIcon showButtonBar :manualInput="false" class="min-w-[300px]" placeholder="Date From - Date To" />
+                    <div class="flex w-full">
+                        <div class="w-2/3">
+                            <Calendar v-model="dateFilter" selectionMode="range" showIcon showButtonBar :manualInput="false" class="min-w-[300px] mr-2" placeholder="Date From - Date To" />
+                            <Dropdown v-model="leaveType" :options="leaveTypes" optionLabel="name" placeholder="Select" checkmark :highlightOnSelect="false" class="min-w-[300px] mr-2 md:w-14rem" />
+                        </div>
+                        <div class="w-1/3 text-right">
+                            <!-- <Button :disabled="selectedRequests.length < 2" class="mr-2" label="Bulk Approve" aria-label="Approve Request" v-tooltip.bottom="'Approve Request'" severity="primary" />
+                            <Button :disabled="selectedRequests.length < 2" class="mr-2" label="Bulk Disapprove" aria-label="Disapprove Request" v-tooltip.bottom="'Disapprove Request'" severity="danger" /> -->
+                            <Button @click="fetchRequests" label="Filter" :disabled="fetchingRequests" severity="info" />
+                        </div>
+                    </div>
+                    <!-- <Calendar v-model="dateFilter" selectionMode="range" showIcon showButtonBar :manualInput="false" class="min-w-[300px]" placeholder="Date From - Date To" />
                     <Dropdown v-model="leaveType" :options="leaveTypes" optionLabel="name" placeholder="Select" checkmark :highlightOnSelect="false" class="min-w-[300px] md:w-14rem" />
-                    <Button @click="fetchRequests" label="Filter" :disabled="fetchingRequests" severity="info" />
+                    <Button @click="fetchRequests" label="Filter" :disabled="fetchingRequests" severity="info" /> -->
                 </div>
             </div>
             <div class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border">
@@ -117,7 +128,7 @@ onMounted(() => {
                     v-model:selection="selectedRequests"
                     dataKey="id"
                     tableStyle="min-width: 50rem">
-                    <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
+                    <!-- <Column selectionMode="multiple" headerStyle="width: 3rem"></Column> -->
                     <Column field="date_added" header="Date Added" style="width: 10%"></Column>
                     <Column field="full_name" header="Name" style="width: 20%"></Column>
                     <Column field="leave_type_name" header="Type" style="width: 10%"></Column>
@@ -128,8 +139,8 @@ onMounted(() => {
                     <Column header="Action" style="width: 10%">
                         <template #body="slotProps">
                             <div v-if="slotProps.data.editable" class="card flex justify-content-center flex-wrap gap-2">
-                                <Button icon="pi pi-thumbs-up" outlined class="w-[2rem] h-[2rem]" aria-label="Approve Request" @click="changeStatus(slotProps.data, 'approve')" v-tooltip.bottom="'Approve Request'"  severity="primary" />
-                                <Button icon="pi pi-thumbs-down" outlined class="w-[2rem] h-[2rem]" aria-label="Disapprove Request" @click="changeStatus(slotProps.data, 'disapprove')" v-tooltip.bottom="'Disapprove Request'" severity="danger" />
+                                <Button icon="pi pi-thumbs-up" :disabled="selectedRequests.length > 1" outlined class="w-[2rem] h-[2rem]" aria-label="Approve Request" @click="changeStatus(slotProps.data, 'approve')" v-tooltip.bottom="'Approve Request'"  severity="primary" />
+                                <Button icon="pi pi-thumbs-down" :disabled="selectedRequests.length > 1" outlined class="w-[2rem] h-[2rem]" aria-label="Disapprove Request" @click="changeStatus(slotProps.data, 'disapprove')" v-tooltip.bottom="'Disapprove Request'" severity="danger" />
                             </div>
                         </template>
                     </Column>
@@ -137,7 +148,7 @@ onMounted(() => {
             </div>
         </div>
         <Dialog v-model:visible="showActionDialog" modal header="Confirm Action" :style="{ width: '25rem' }">
-            <span class="p-text-secondary block mb-8">Are you sure you want to {{ selectedStatus }} the request?</span>
+            <span class="p-text-secondary block mb-8">Are you sure you want to {{ selectedStatus }} the selected request(s)?</span>
             <div class="flex align-items-center gap-3 mb-3">
                  <FloatLabel class="w-full md:w-14rem mb-1">
                     <Textarea v-model="actionReason" 
@@ -154,6 +165,5 @@ onMounted(() => {
                 <Button type="button" label="Yes" @click="confirmAction" :disabled="!canSubmit || isSubmitting" :severity="selectedStatus == 'approve' ? 'primary' : 'danger'"></Button>
             </div>
         </Dialog>
-
     </AppLayout>
 </template>
