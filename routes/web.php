@@ -25,6 +25,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/leaves/update-status', [LeaveController::class, 'postUpdateLeaveStatus'])->name('leaves.update-status');
     Route::post('/leaves/{id}', [LeaveController::class, 'postUpdateLeave'])->name('leaves.update');
     Route::get('/leaves/{id}/edit', [LeaveController::class, 'showEditLeaveRequestPage'])->name('leaves.edit');
+    Route::get('/leaves/{id}/detail', [LeaveController::class, 'getLeaveRequestDetail'])->name('leaves.show');
 
     // Route::get('/members')
     Route::get('/team/members', [TeamController::class, 'showMembersPage'])->name('team.members');

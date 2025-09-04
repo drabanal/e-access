@@ -11,8 +11,8 @@ declare module 'vue' {
     Avatar: typeof import('primevue/avatar')['default']
     Breadcrumb: typeof import('primevue/breadcrumb')['default']
     Button: typeof import('primevue/button')['default']
+    ButtonGroup: typeof import('primevue/buttongroup')['default']
     Calendar: typeof import('primevue/calendar')['default']
-    Card: typeof import('primevue/card')['default']
     Checkbox: typeof import('primevue/checkbox')['default']
     ConfirmDialog: typeof import('primevue/confirmdialog')['default']
     Dialog: typeof import('primevue/dialog')['default']
@@ -28,7 +28,6 @@ declare module 'vue' {
     Toast: typeof import('primevue/toast')['default']
   }
   export interface GlobalDirectives {
-    Ripple: typeof import('primevue/ripple')['default']
     Tooltip: typeof import('primevue/tooltip')['default']
   }
 }

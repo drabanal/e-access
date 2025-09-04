@@ -65,8 +65,8 @@ onBeforeMount(() => {
     <Head title="Calendar" />
     <AppLayout :breadcrumbs="breadcrumbs" class="text-sm">
         <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
-            <div class="flex">
-                <div class="grid grid-cols-3 gap-4 mt-5">
+            <div class="flex gap-4 mt-5">
+                <div class="w-1/4">
                     <FloatLabel class="w-full md:w-14rem">
                         <Dropdown v-model="team" 
                             :options="teams" 
@@ -76,6 +76,34 @@ onBeforeMount(() => {
                             class="w-full md:w-14rem" />
                         <label for="dd-city">Filter</label>
                     </FloatLabel>
+                </div>
+            </div>
+            <div class="flex mt-5">
+                <div class="grid grid-cols-6 gap-3 mt-2 uppercase">
+                    <div class="p-4 rounded-2xl text-left align-middle">
+                        <span class="bg-red-500 w-[10px] h-[10px] inline-block mr-2"></span>
+                        <span>sick</span>
+                    </div>
+                    <div class="p-4 rounded-2xl text-left align-middle">
+                        <span class="bg-green-500 w-[10px] h-[10px] inline-block mr-2"></span>
+                        <span>vacation</span>
+                    </div>
+                    <div class="p-4 rounded-2xl text-left align-middle">
+                        <span class="bg-orange-500 w-[10px] h-[10px] inline-block mr-2"></span>
+                        <span>lwop</span>
+                    </div>
+                    <div class="p-4 rounded-2xl text-left align-middle">
+                        <span class="bg-orange-400 w-[10px] h-[10px] inline-block mr-2"></span>
+                        <span>undertime</span>
+                    </div>
+                    <div class="p-4 rounded-2xl text-left align-middle">
+                        <span class="bg-blue-500 w-[10px] h-[10px] inline-block mr-2"></span>
+                        <span>maternity / paternity</span>
+                    </div>
+                    <div class="p-4 rounded-2xl text-left align-middle">
+                        <span class="bg-gray-500 w-[10px] h-[10px] inline-block mr-2"></span>
+                        <span>bereavement</span>
+                    </div>
                 </div>
             </div>
             <div class="w-full">

@@ -348,4 +348,34 @@ class LeaveController extends Controller
             return response()->json(['message' => $e->getMessage()])->setStatusCode(400);
         }
     }
+
+    public function getLeaveRequestDetail($id)
+    {
+        try {
+            $leave_request = $this->leaveService->getLeaveRequestById($id);
+
+            if (!$leave_request) {
+                return response()->json('Leave request not found!')->setStatusCode(404);
+            }
+
+            $additionalRemarks = [];
+            $statusLogs = $leave_request->leaveStatusLogs()->where('leave_status_id', '!=', LeaveStatus::PENDING)->get();
+
+            foreach ($statusLogs as $log) {
+                array_push($additionalRemarks, [
+                    'id' => $log->id,
+                    'status' => $log->leaveStatus->name,
+                    'changed_by' => ($log->user) ? $log->user->employee->getFullNameAttribute() : 'System',
+                    'reason' => $log->reason,
+                    'date_changed' => Carbon::parse($log->created_at)->format('M d, Y h:i A')
+                ]);
+            }
+
+            $leave_request->additional_remarks = $additionalRemarks;
+
+            return response()->json($leave_request)->setStatusCode(200);
+        } catch (\Exception $e) {
+            return response()->json($e->getMessage())->setStatusCode(400);
+        }
+    }
 }
