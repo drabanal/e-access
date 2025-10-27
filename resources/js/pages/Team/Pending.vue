@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/vue3';
+import { Head, usePage } from '@inertiajs/vue3';
 import { onMounted, ref, watch, computed } from 'vue';
 import axios from 'axios';
 import Dropdown from 'primevue/dropdown';
@@ -16,6 +16,8 @@ import Dialog from 'primevue/dialog';
 
 
 const props = defineProps({ leaveTypes: Array })
+const page = usePage();
+const user = page.props.auth.user as User;
 
 const breadcrumbs = ref([
     { label: 'Team' },
@@ -56,7 +58,7 @@ const selectedRequest = ref();
 const selectedStatus = ref('');
 const selectedRequests = ref([]);
 const canSubmit = computed(() => {
-    return actionReason.value && actionReason.value.trim() !== '' ? true : false
+    return actionReason.value && actionReason.value.trim() !== '' || user?.userlevel === 1 ? true : false
 });
 
 const changeStatus = (item: object, status: string) => {
@@ -231,7 +233,7 @@ onMounted(() => {
         </div>
         <Dialog v-model:visible="showActionDialog" modal header="Confirm Action" :style="{ width: '25rem' }">
             <span class="p-text-secondary block mb-8">Are you sure you want to {{ selectedStatus }} the selected request(s)?</span>
-            <div class="flex align-items-center gap-3 mb-3">
+            <div class="flex align-items-center gap-3 mb-3" v-if="user.userlevel !== 1">
                  <FloatLabel class="w-full md:w-14rem mb-1">
                     <Textarea v-model="actionReason" 
                         rows="5" 
