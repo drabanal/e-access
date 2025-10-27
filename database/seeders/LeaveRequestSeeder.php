@@ -20,47 +20,52 @@ class LeaveRequestSeeder extends Seeder
     public function run(): void
     {
         DB::statement('SET FOREIGN_KEY_CHECKS=0');
-        DB::table('leave_status_logs')->truncate();
-        DB::table('leave_requests')->truncate();
-        $leave_credits_details = LeaveCreditsDetail::all();
-
+        $referenceIds = LeaveRequest::whereNotNull('reference_id')->pluck('reference_id')->toArray();
+        $leave_credits_details = LeaveCreditsDetail::whereNotIn('id', $referenceIds)->get();
+        \Illuminate\Support\Facades\Log::info('Leave Credits Details Count: ' . $leave_credits_details->count());
+        $cnt = 0;
         foreach ($leave_credits_details as $leave_detail) {
+            \Illuminate\Support\Facades\Log::info('Seeding Leave Detail ID: ' . $leave_detail->id . ' for Employee ID: ' . $leave_detail->empid);
             $user = User::where('userid', $leave_detail->empid)->first();
+            if (!$user) {
+                \Illuminate\Support\Facades\Log::warning('User not found for Employee ID: ' . $leave_detail->empid);
+                continue;
+            }
             $leave_status = LeaveStatus::find(($leave_detail->status + 1));
             $leave_type = LeaveType::find(($leave_detail->tagvl + 1));
             $duration = $this->getDuration($leave_detail);
             $status_log_notes = $this->getStatusLogNotes($leave_detail);
 
-            if ($user) {
-                $leave_request_data = [
-                    'user_id' => $user->id,
-                    'leave_type_id' => $leave_type->id,
-                    'leave_status_id' => $leave_status->id,
-                    'date_time_from' => $leave_detail->fromtime,
-                    'date_time_to' => $leave_detail->totime,
-                    'duration' => $duration,
-                    'is_full_shift' => ($duration == 8) ? true : false,
-                    'remove_break_hours' => ($duration == 8) ? true : false,
-                    'remarks' => $leave_detail->remarks,
-                    'approve_reason' => $leave_detail->approve_reason,
-                    'disapprove_reason' => $leave_detail->disapprove_reason,
-                    'cancel_reason' => $leave_detail->cancel_reason,
-                    'reference_id' => $leave_detail->id,
-                    'created_at' => $leave_detail->actualdateadded
-                ];
+            $leave_request_data = [
+                'user_id' => $user->id,
+                'leave_type_id' => $leave_type->id,
+                'leave_status_id' => $leave_status->id,
+                'date_time_from' => $leave_detail->fromtime,
+                'date_time_to' => $leave_detail->totime,
+                'duration' => $duration,
+                'is_full_shift' => ($duration == 8) ? true : false,
+                'remove_break_hours' => ($duration == 8) ? true : false,
+                'remarks' => $leave_detail->remarks,
+                'approve_reason' => $leave_detail->approve_reason,
+                'disapprove_reason' => $leave_detail->disapprove_reason,
+                'cancel_reason' => $leave_detail->cancel_reason,
+                'reference_id' => $leave_detail->id,
+                'created_at' => $leave_detail->actualdateadded
+            ];
 
-                $leave_request = LeaveRequest::create($leave_request_data);
+            $leave_request = LeaveRequest::create($leave_request_data);
 
-                $status_log_data = [
-                    'leave_request_id' => $leave_request->id,
-                    'leave_status_id' => $leave_status->id,
-                    'reason' => $status_log_notes
-                ];
+            $status_log_data = [
+                'leave_request_id' => $leave_request->id,
+                'leave_status_id' => $leave_status->id,
+                'reason' => $status_log_notes
+            ];
 
-                LeaveStatusLog::create($status_log_data);
-            }
+            LeaveStatusLog::create($status_log_data);
+            $cnt++;
 
         }
+        \Illuminate\Support\Facades\Log::info('Seeded: ' . $cnt);
         DB::statement('SET FOREIGN_KEY_CHECKS=1');
     }
 
