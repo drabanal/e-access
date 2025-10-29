@@ -317,11 +317,12 @@ class LeaveController extends Controller
 
                 if ($status_id == LeaveStatus::ADMIN_APPROVED) {
                     $supervisor = $leave_request->user->employee->supervisor();
-                    $cc_recipients = env('NOTIFICATION_CC_RECIPIENTS');
+                    $cc_recipients = explode(',', env('NOTIFICATION_CC_RECIPIENTS'));
 
                     if ($supervisor && strtolower($supervisor->empemail) !== strtolower($leave_request->user->email)) {
-                        $cc_recipients = env('NOTIFICATION_CC_RECIPIENTS') . ',' . strtolower($supervisor->empemail);
+                        array_push($cc_recipients, strtolower($supervisor->empemail));
                     }
+
                     Mail::to($leave_request->user)->cc($cc_recipients)->send(new LeaveRequestStatusUpdated($leave_request));
                 } else {
                     Mail::to($leave_request->user)->send(new LeaveRequestStatusUpdated($leave_request));

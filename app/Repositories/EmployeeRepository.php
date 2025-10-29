@@ -21,8 +21,8 @@ class EmployeeRepository extends AbstractRepository
         $query = $this->model->select('employees.empid','users.id AS user_id','empid AS employee_id', 'empstatus AS status', 'empfname', 'empgname')
             ->addSelect(DB::raw('CONCAT(empfname,", ",empgname) AS full_name'))
             ->join('users', 'users.userid', '=', 'employees.empid')
-            ->where('empstatus', Employee::EMPLOYEE_STATUS_REGULAR)
-            ->orderBy('full_name');
+            ->whereIn('empstatus', [Employee::EMPLOYEE_STATUS_REGULAR, Employee::EMPLOYEE_STATUS_PROBATIONARY])
+            ->orderBy('full_name', 'ASC');
 
         if ($user->userlevel == User::TL_ROLE) {
             $query->where('posid_man', $user->userid);

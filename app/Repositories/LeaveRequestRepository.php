@@ -90,17 +90,15 @@ class LeaveRequestRepository extends AbstractRepository
             ->addSelect(DB::raw('CONCAT(duration," hour(s)") AS duration'))
             ->addSelect('leave_types.name AS leave_type_name')
             ->addSelect(DB::raw('CONCAT(empfname,", ",empgname) AS full_name'))
-            ->addSelect(DB::raw("IF(DATEDIFF(date_time_from, CURDATE()) >= 0, TRUE, FALSE) 'editable'"))
+            ->addSelect(DB::raw("TRUE AS 'editable'"))
             ->join('leave_types', 'leave_types.id', '=', 'leave_requests.leave_type_id')
             ->join('users', 'users.id', '=', 'leave_requests.user_id')
             ->join('employees', 'employees.empid', '=', 'users.userid')
-            ->whereRaw(DB::raw("YEAR(date_time_from) = YEAR(CURDATE())"))
+            ->whereRaw(DB::raw("YEAR(date_time_from) >= YEAR(CURDATE())"))
             ->addSelect(DB::raw('IF(leave_status_id = 1,"Pending TL approval", IF(leave_status_id = 2,"Pending Admin approval","")) AS status'));
 
         if ($role == User::TL_ROLE) {
             $query->where('employees.posid_man', $user_id);
-        } else {
-            $query->where('employees.empid', '!=', $user_id);
         }
 
         if (!is_null($leave_type_id)) {
