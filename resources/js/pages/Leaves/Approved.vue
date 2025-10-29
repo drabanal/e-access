@@ -162,5 +162,30 @@ onMounted(() => {
                 <em v-if="log.reason">"{{ log.reason }}"</em><br>
             </p>
         </Dialog>
+        <Dialog v-model:visible="showCancelDialog" modal header="Cancel Request Confirmation" :style="{ width: '25rem' }">
+            <span class="p-text-secondary block mb-5">Are you sure you want to cancel the request?</span>
+            <div class="flex align-items-center gap-3 mb-3">
+                 <FloatLabel class="w-full md:w-14rem mb-1">
+                    <Textarea v-model="cancelReason" 
+                        rows="5" 
+                        cols="30" 
+                        inputId="remarks" 
+                        :readonly="isSubmitting" 
+                        class="w-full md:w-14rem" />
+                    <label for="remarks">Reason</label>
+                </FloatLabel>
+            </div>
+            <div class="flex flex-wrap justify-end gap-3">
+                <Button type="button" 
+                    label="Cancel" 
+                    severity="secondary" 
+                    @click="showCancelDialog = false" />
+                <Button 
+                    type="button" 
+                    label="Yes" 
+                    @click="confirmCancel" 
+                    severity="danger" />
+            </div>
+        </Dialog>
     </AppLayout>
 </template>
