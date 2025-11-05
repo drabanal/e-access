@@ -39,31 +39,36 @@ class LeaveService
         $leave_consumption = $this->leaveTypeRepository->getLeaveUsageForCurrentYear($user->id);
 
         foreach ($leave_consumption as $detail) {
-            if ($detail->id == 1) {
-                $used = (!is_null($detail->used) && $detail->used > 0) ? $detail->used : 0;
-                $availableHrs = ($leave_credits->totalsldays * 8) + $leave_credits->totalslhours;
-                $available = $leave_credits->totalsldays;
-                $remaining = $availableHrs - $used;
-            } elseif ($detail->id == 2) {
-                $used = (!is_null($detail->used) && $detail->used > 0) ? $detail->used : 0;
-                $availableHrs = ($leave_credits->totalvldays * 8) + $leave_credits->totalvlhours;
-                $available = $leave_credits->totalvldays;
-                $remaining = $availableHrs - $used;
+            if ($leave_credits) {
+                if ($detail->id == 1) {
+                    $used = (!is_null($detail->used) && $detail->used > 0) ? $detail->used : 0;
+                    $availableHrs = ($leave_credits->totalsldays * 8) + $leave_credits->totalslhours;
+                    $available = $leave_credits->totalsldays;
+                    $remaining = $availableHrs - $used;
+                } elseif ($detail->id == 2) {
+                    $used = (!is_null($detail->used) && $detail->used > 0) ? $detail->used : 0;
+                    $availableHrs = ($leave_credits->totalvldays * 8) + $leave_credits->totalvlhours;
+                    $available = $leave_credits->totalvldays;
+                    $remaining = $availableHrs - $used;
+                } else {
+                    $used = (!is_null($detail->used) && $detail->used > 0) ? $detail->used : 0;
+                    $availableHrs = 0;
+                }
+
+                $usedDays = floor($used / 8) ? floor($used / 8).'d' : '';
+                $usedHours = floor($used % 8) ? floor($used % 8).'h' : '';
+
+                $remainingDays = floor($remaining / 8) ? floor($remaining / 8).'d' : '';
+                $remainingHours = floor($remaining % 8) ? floor($remaining % 8).'h' : '';
+                $detail->available = $available . 'd';
+                $detail->remaining = !empty($remainingDays) || !empty($remainingHours) ? "{$remainingDays} {$remainingHours}" : '0h';
+                $detail->used = !empty($usedDays) || !empty($usedHours) ? "{$usedDays} {$usedHours}" : '0h';
             } else {
-                $used = (!is_null($detail->used) && $detail->used > 0) ? $detail->used : 0;
-                $availableHrs = 0;
+                $detail->available = '0d';
+                $detail->remaining = '0h';
+                $detail->used = '0h';
             }
-
-            $usedDays = floor($used / 8) ? floor($used / 8).'d' : '';
-            $usedHours = floor($used % 8) ? floor($used % 8).'h' : '';
-
-            $remainingDays = floor($remaining / 8) ? floor($remaining / 8).'d' : '';
-            $remainingHours = floor($remaining % 8) ? floor($remaining % 8).'h' : '';
-            $detail->available = $available . 'd';
-            $detail->remaining = !empty($remainingDays) || !empty($remainingHours) ? "{$remainingDays} {$remainingHours}" : '0h';
-            $detail->used = !empty($usedDays) || !empty($usedHours) ? "{$usedDays} {$usedHours}" : '0h';
         }
-
 
         return $leave_consumption;
     }

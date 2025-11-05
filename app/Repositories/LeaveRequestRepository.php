@@ -125,7 +125,7 @@ class LeaveRequestRepository extends AbstractRepository
             ->addSelect(DB::raw('DATE_FORMAT(leave_requests.date_time_from, "%Y-%m-%d") AS start'))
             ->addSelect(DB::raw('DATE_FORMAT(leave_requests.date_time_to, "%Y-%m-%d") AS end'))
             ->addSelect('leave_types.name AS leave_type_name')
-            ->addSelect(DB::raw('CONCAT(employees.empgname," ",employees.empfname," (",DATE_FORMAT(leave_requests.date_time_from, "%H:%i: %p")," - ",DATE_FORMAT(leave_requests.date_time_to, "%H:%i: %p"),")") AS title'))
+            ->addSelect(DB::raw('CONCAT(employees.empfname,", ",employees.empgname," (",DATE_FORMAT(leave_requests.date_time_from, "%H:%i: %p")," - ",DATE_FORMAT(leave_requests.date_time_to, "%H:%i: %p"),")") AS title'))
             ->join('leave_types', 'leave_types.id', '=', 'leave_requests.leave_type_id')
             ->join('users', 'users.id', '=', 'leave_requests.user_id')
             ->join('employees', 'employees.empid', '=', 'users.userid')

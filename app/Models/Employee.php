@@ -31,7 +31,7 @@ class Employee extends Model
 
     public function getFullNameAttribute()
     {
-        return $this->empgname . ' ' . $this->empfname;
+        return $this->empfname . ', ' . $this->empgname;
     }
 
     public function leaveCredits()
