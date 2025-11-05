@@ -83,6 +83,7 @@ class LeaveRequestRepository extends AbstractRepository
 
     public function getMembersPendingRequest($user_id, $role, $leave_type_id, $leave_status_id, $date_range)
     {
+        
         $query = $this->model->select('leave_requests.id', 'leave_requests.remarks')
             ->addSelect(DB::raw('DATE_FORMAT(leave_requests.created_at, "%b %e, %Y") AS date_added'))
             ->addSelect(DB::raw('DATE_FORMAT(leave_requests.date_time_from, "%m/%d/%Y %h:%i %p") AS date_from'))
@@ -105,8 +106,16 @@ class LeaveRequestRepository extends AbstractRepository
             $query->where('leave_type_id', $leave_type_id);
         }
 
-        if (!is_null($leave_status_id)) {
-            $query->whereIn('leave_status_id', [$leave_status_id]);
+        if ($role == User::ADMIN_ROLE) {
+            $query->where(function ($qry) use ($leave_status_id, $user_id) {
+                $qry->whereIn('leave_requests.leave_status_id', [$leave_status_id])
+                    ->orWhere(function ($qry2) use ($user_id) {
+                        $qry2->where('employees.posid_man', $user_id)
+                            ->where('leave_requests.leave_status_id', LeaveStatus::PENDING);
+                    });
+            });
+        } else {
+            $query->whereIn('leave_requests.leave_status_id', [$leave_status_id]);
         }
 
         if (!is_null($date_range)) {
