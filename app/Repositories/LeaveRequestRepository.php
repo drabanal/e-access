@@ -52,21 +52,22 @@ class LeaveRequestRepository extends AbstractRepository
 
     public function checkForConflict($id, $data)
     {
-        $from = Carbon::parse($data['date_range'][0])->format('Y-m-d H:i');
-        $to = Carbon::parse($data['date_range'][1])->format('Y-m-d H:i');
-        $query = $this->model->select('*')
+        $startDateTime = Carbon::parse($data['date_range'][0])->format('Y-m-d H:i');
+        $endDateTime = Carbon::parse($data['date_range'][1])->format('Y-m-d H:i');
+
+        $conflict = $this->model
             ->where('user_id', $data['user_id'])
-            ->where(function($qry) use ($from, $to) {
-                $qry->whereBetween('date_time_from', [$from, $to])
-                    ->orWhereBetween('date_time_to', [$from, $to]);
+            ->where(function ($query) use ($startDateTime, $endDateTime) {
+                $query->where('date_time_from', '<', $endDateTime)
+                      ->where('date_time_to', '>', $startDateTime);
             })
             ->whereNotIn('leave_status_id', [4, 5]);
 
         if (!is_null($id)) {
-            $query->where('id', '!=', $id);
+            $conflict->where('id', '!=', $id);
         }
-
-        return $query->first();
+        
+        return $conflict->first();
     }
 
     public function getApprovedLeavesByLeaveType($leave_type_id, $user_id)
