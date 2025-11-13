@@ -61,6 +61,10 @@ const canSubmit = computed(() => {
     return actionReason.value && actionReason.value.trim() !== '' || user?.userlevel === 1 ? true : false
 });
 
+const editRequest = (item: object) => {
+    router.visit(`/leaves/${item.id}/edit`)
+}
+
 const changeStatus = (item: object, status: string) => {
     selectedRequest.value = item;
     showActionDialog.value = true;
@@ -103,7 +107,6 @@ const bulkUpdateStatus = (status: string) => {
     actionReason.value = '';
     selectedStatus.value = status;
 }
-
 
 const selectableRequests = computed(() => 
     leaveRequests.value.filter(p => p.editable)
@@ -225,6 +228,15 @@ onMounted(() => {
                                     @click="changeStatus(slotProps.data, 'disapprove')" 
                                     v-tooltip.bottom="'Disapprove Request'" 
                                     severity="danger" />
+                                <Button icon="pi pi-file-edit" 
+                                    :disabled="selectedRequests.length > 1" 
+                                    outlined 
+                                    rounded 
+                                    class="w-[2rem] h-[2rem]" 
+                                    aria-label="Edit Request" 
+                                    @click="editRequest(slotProps.data)"
+                                    v-tooltip.bottom="'Edit Request'" 
+                                    severity="info" />
                             </div>
                         </template>
                     </Column>

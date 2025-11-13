@@ -8,14 +8,12 @@ import Card from 'primevue/card';
 import { useToast } from "primevue/usetoast";
 import { router } from '@inertiajs/vue3';
 
-const props = defineProps({ leaveTypes: Array, user: Object, leaveRequest: Object })
+const props = defineProps({ leaveTypes: Array, user: Object, leaveRequest: Object, inBehalf: Boolean, leaveUser: Object })
 
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Edit Leave',
-        href: '/leaves/edit',
-    }
-];
+const breadcrumbs = ref([
+    { label: 'Leaves' },
+    { label: props.inBehalf ? 'Edit - ' + props.leaveUser?.empfname + ', ' + props.leaveUser?.empgname : 'Edit' }
+])
 
 const toast = useToast();
 
@@ -173,7 +171,11 @@ const submitRequest = () => {
     axios.post(`/leaves/${props.leaveRequest?.id}`, payload).then((response) => {
         isSubmitting.value = false
         toast.add({ severity: 'success', summary: 'Success!', detail: response.data.message, life: 5000 });
-        router.visit('/leaves/pending', { method: 'get' })
+        if (props.inBehalf) {
+            router.visit('/team/pending', { method: 'get' })
+        } else {
+            router.visit('/leaves/pending', { method: 'get' })
+        }
     })
     .catch((error) => {
         isSubmitting.value = false

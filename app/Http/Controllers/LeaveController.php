@@ -181,12 +181,14 @@ class LeaveController extends Controller
         }
 
         $leaveRequest->leaveType;
-
+        $leaveUser = $leaveRequest->user->employee;
         $user = Auth::user()->employee;
         return Inertia::render('Leaves/[id]', [
             'leaveTypes' => LeaveType::all(),
             'user' => $user,
-            'leaveRequest' => $leaveRequest
+            'leaveRequest' => $leaveRequest,
+            'inBehalf' => ($leaveRequest->user_id != Auth::user()->id) ? true : false,
+            'leaveUser' => $leaveUser,
         ]);
     }
 
