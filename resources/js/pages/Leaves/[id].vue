@@ -29,7 +29,8 @@ const invalidTotalHours = ref(false);
 const timeFrom = ref();
 const timeTo = ref();
 const isSubmitting = ref(false);
-const timeRange = ref()
+const startTime = ref()
+const endTime = ref()
 
 watch(() => removeBreak.value, (val: boolean) => {
     if (val) {
@@ -42,13 +43,11 @@ watch(() => removeBreak.value, (val: boolean) => {
 
 })
 
-watch([dateRange, timeRange, timeFrom, timeTo], () => {
-    removeBreak.value = false
+watch([dateRange, startTime, endTime], () => {
     calculateTotalHours()
 });
 
 onMounted(() => {
-    console.log(props.leaveRequest)
     leaveType.value = props.leaveRequest?.leave_type
     
     const currentDate = new Date()
@@ -60,25 +59,21 @@ onMounted(() => {
         new Date(dateTimeTo[0])
     ];
 
-    timeRange.value = [
-        new Date(new Date().toLocaleDateString() + ' ' + dateTimeFrom[1]),
-        new Date(new Date().toLocaleDateString() + ' ' + dateTimeTo[1])
-    ]
-    console.log(props.leaveRequest?.remove_break_hours == 1)
-    removeBreak.value = true
-
+    startTime.value = new Date(new Date().toLocaleDateString() + ' ' + dateTimeFrom[1])
+    endTime.value = new Date(new Date().toLocaleDateString() + ' ' + dateTimeTo[1])
+    removeBreak.value = props.leaveRequest?.remove_break_hours == 1
     remarks.value = props.leaveRequest?.remarks
 })
 
 const canSubmit = computed(() => {
-    return leaveType.value || dateRange.value || timeFrom.value || timeTo.value || remarks.value || timeRange.value
+    return leaveType.value || dateRange.value || timeFrom.value || timeTo.value || remarks.value || startTime.value || endTime.value
 })
 
 const calculateTotalHours = () => {
-    if (dateRange.value.length == 2 && timeRange.value.length == 2) {
+    if (dateRange.value.length == 2 && startTime.value && endTime.value) {
         totalHours.value = 0
-        let selectedTimeFrom = timeRange.value[0]
-        let selectedTimeTo = timeRange.value[1]
+        let selectedTimeFrom = startTime.value
+        let selectedTimeTo = endTime.value
 
         if (dateRange.value[1]) {
             const dayDifference = getDayDifference(dateRange.value[0].toLocaleDateString(), dateRange.value[1].toLocaleDateString())
@@ -158,8 +153,8 @@ const submitRequest = () => {
         user_id: props.leaveRequest?.user_id,
         leave_type_id: leaveType.value.id,
         date_range: [
-            dateRange.value[0].toLocaleDateString() + ' ' + timeRange.value[0].toLocaleTimeString(),
-            dateRange.value[1].toLocaleDateString() + ' ' + timeRange.value[1].toLocaleTimeString()
+            dateRange.value[0].toLocaleDateString() + ' ' + startTime.value.toLocaleTimeString(),
+            dateRange.value[1].toLocaleDateString() + ' ' + endTime.value.toLocaleTimeString()
         ],
         duration: totalHours.value,
         remarks: remarks.value,
@@ -230,20 +225,29 @@ const disabledSeconds = () => {
                             </FloatLabel>
                             <small class="text-red-400" v-if="invalidTotalHours" id="invalid-date-time">Invalid date and time</small>
                         </div>
-                        <div class="mb-4">
+                        <div class="mb-4 flex flex-row gap-4">
                             <div>
                                 <FloatLabel class="w-full md:w-14rem mb-1">
                                     <el-time-picker
-                                        v-model="timeRange"
-                                        is-range
-                                        range-separator="-"
-                                        start-placeholder="Start time"
-                                        end-placeholder="End time"
+                                        v-model="startTime"
+                                        placeholder="Start Time"
                                         :disabled-seconds="disabledSeconds"
                                         size="large"
-                                        style="width: auto;"
+                                        style="width: 100%;"
                                         />
-                                    <label for="totalHours">Total Hours</label>
+                                    <label for="totalHours">Start Time</label>
+                                </FloatLabel>
+                            </div>
+                            <div>
+                                <FloatLabel class="w-full md:w-14rem mb-1">
+                                    <el-time-picker
+                                        v-model="endTime"
+                                        placeholder="End Time"
+                                        :disabled-seconds="disabledSeconds"
+                                        size="large"
+                                        style="width: 100%;"
+                                        />
+                                    <label for="totalHours">End Time</label>
                                 </FloatLabel>
                             </div>
                         </div>
