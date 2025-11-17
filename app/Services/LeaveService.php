@@ -12,6 +12,7 @@ use App\Repositories\LeaveTypeRepository;
 use App\Repositories\UserRepository;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
+use Illuminate\Support\Facades\Auth;
 
 class LeaveService
 {
@@ -151,7 +152,7 @@ class LeaveService
 
             $diff = $this->getDateDifferenceExcludingWeekends($current_date, $leave_date);
 
-            if ($diff <= 5) {
+            if ($diff <= 5 && $data['user_id'] == Auth::user()->id) {
                 return (object) [
                     'is_valid' => false,
                     'message' => "Vacation Leave should be filed atleast 5 business days ahead."
