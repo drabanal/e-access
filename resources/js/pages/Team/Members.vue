@@ -149,6 +149,39 @@ const addLeave = (item: object) => {
     router.visit(`/leaves/add`, { method: 'get', data: { user_id: item?.user.id }})
 }
 
+
+const showCancelDialog = ref(false);
+const cancelReason = ref(null);
+const isSubmitting = ref(false);
+
+const cancelRequest = (item: object) => {
+    selectedRequest.value = item;
+    showCancelDialog.value = true;
+    cancelReason.value = null;
+};
+
+const confirmCancel = () => {
+    const payload = {
+        id: [selectedRequest.value.id],
+        reason: cancelReason.value,
+        action: 'cancel'
+    }
+    isSubmitting.value = true;
+    axios.post(`/leaves/update-status`, payload).then((response) => {
+        isSubmitting.value = false
+        toast.add({ severity: 'success', summary: 'Success!', detail: response.data.message, life: 5000 });
+        // fetchRequests();
+        showCancelDialog.value = false
+        // showMemberInfoDialog.value = false;
+        fetchMembersLeaveRequests();
+    })
+    .catch((error) => {
+        console.log(error)
+        isSubmitting.value = false
+        toast.add({ severity: 'error', summary: 'Something went wrong!', detail: error.response.data.message, life: 5000 });
+    });
+}
+
 onMounted(() => {
     fetchMembers();
 })
@@ -247,6 +280,13 @@ onMounted(() => {
                     <Column field="disapprove_reason" v-if="['disapproved', 'cancelled'].includes(selectedTab)" header="Reason" style="width: 15%"></Column>
                     <Column header="Action" v-if="selectedTab !== 'cancelled'" style="width: 5%">
                         <template #body="slotProps">
+                            <Button icon="pi pi-times-circle" 
+                                outlined 
+                                class="w-[2rem] h-[2rem]" 
+                                aria-label="Cancel" 
+                                @click="cancelRequest(slotProps.data)" 
+                                v-tooltip.bottom="'Cancel Request'" 
+                                severity="warning" />
                         </template>
                     </Column>
                 </DataTable>
@@ -265,6 +305,33 @@ onMounted(() => {
                 <strong>{{ log.status }}</strong> - {{  log.changed_by }} on <em>{{ log.date_changed }}</em> <br />
                 <em v-if="log.reason">"{{ log.reason }}"</em><br>
             </p>
+        </Dialog>
+         <Dialog v-model:visible="showCancelDialog" modal header="Cancel Request Confirmation" :style="{ width: '25rem' }">
+            <span class="p-text-secondary block mb-5">Are you sure you want to cancel the request?</span>
+            <div class="flex align-items-center gap-3 mb-3">
+                 <FloatLabel class="w-full md:w-14rem mb-1">
+                    <Textarea v-model="cancelReason" 
+                        rows="5" 
+                        cols="30" 
+                        inputId="remarks" 
+                        :readonly="isSubmitting" 
+                        class="w-full md:w-14rem" />
+                    <label for="remarks">Reason</label>
+                </FloatLabel>
+            </div>
+            <div class="flex flex-wrap justify-end gap-3">
+                <Button type="button" 
+                    label="Cancel" 
+                    severity="secondary" 
+                    :disabled="isSubmitting"
+                    @click="showCancelDialog = false" />
+                <Button 
+                    type="button" 
+                    label="Yes" 
+                    @click="confirmCancel"
+                    :loading="isSubmitting"
+                    severity="danger" />
+            </div>
         </Dialog>
     </AppLayout>
 </template>
