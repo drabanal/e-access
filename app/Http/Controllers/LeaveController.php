@@ -104,7 +104,8 @@ class LeaveController extends Controller
             if ($data['user_id'] != $auth_user->id) {
                 $leave_user = $this->leaveService->getUserById($data['user_id']);
                 $data['leave_status_id'] = ($leave_user->userlevel == User::ADMIN_ROLE) ? LeaveStatus::TL_APPROVED : LeaveStatus::PENDING;
-                $data['remarks'] = '[TL OVERRIDE]: '.$data['remarks'];
+                $role = ($auth_user->userlevel == User::ADMIN_ROLE) ? 'ADMIN' : 'TL';
+                $data['remarks'] = "[{$role} OVERRIDE]: ".$data['remarks'];
                 $created_in_behalf = true;
             } else {
                 $data['leave_status_id'] = ($auth_user->userlevel == User::ADMIN_ROLE) ? LeaveStatus::TL_APPROVED : LeaveStatus::PENDING;
